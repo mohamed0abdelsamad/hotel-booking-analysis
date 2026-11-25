@@ -8,11 +8,27 @@ The data is originally from the article Hotel Booking Demand Datasets, written b
 
 The data was downloaded and cleaned by Thomas Mock and Antoine Bichat for #TidyTuesday during the week of February 11th, 2020.
 
-## Data Cleaning Summary
-The raw dataset (`data/raw/hotel_bookings.csv`) was audited and transformed using Power Query before building the dashboard:
+# Hotel Booking Demand Analysis
 
-- **Missing & Placeholder Values:** Replaced literal `"NULL"` strings in `agent` and `company` with `0` (representing direct bookings without an agency or corporate account) and imputed missing `country` values as `"Unknown"`.
-- **Category Consolidation:** Merged `"Undefined"` entries in the `meal` column into `"SC"` (Self Catering), as both represent bookings without a meal package.
-- **Invalid Records & Anomalies:** Filtered out invalid records with `0` total guests (`adults + children + babies = 0`) and flagged `0`-night stays with `0` ADR so they do not distort average daily rate calculations.
-- **Duplicate Handling Decision:** **Retained exact duplicate rows.** Because the dataset lacks a unique booking or room ID, consecutive identical rows—particularly in the `Groups` and `Corporate` segments—represent multi-room block bookings rather than system errors. Keeping them ensures accurate room volume, occupancy, and revenue totals.
-- **Date & Type Standardization:** Merged `arrival_date_day_of_month`, `arrival_date_month`, and `arrival_date_year` into a unified `arrival_date` column, and formatted `adr`, `lead_time`, and `reservation_status_date` to their proper numeric and date types.
+![Hotel Bookings Dashboard](reports/figures/dashboard_preview.png)
+
+## Data Cleaning (Power Query)
+- **Missing Values:** Replaced `"NULL"` and `"NA"` in `agent`, `company`, and `children` with `0`, and imputed missing `country` values as `"Unknown"`.
+- **Categories & Dates:** Merged `"Undefined"` meals into `"SC"` (Self Catering) and combined arrival year, month, and day into a single `arrival_date` column.
+- **Anomalies:** Removed invalid bookings with `0` total guests.
+- **Duplicates:** Retained consecutive identical rows because the dataset lacks a booking ID; identical rows in `Groups` and `Corporate` segments represent multi-room block bookings.
+
+## Data Modeling & DAX
+- Built a Star Schema connecting `hotel_bookings` to a `Calendar` table and `Meal_Lookup` table.
+- Created DAX columns and measures for **Total Bookings**, **Cancellation Rate (%)**, **Realized Revenue**, **Average Daily Rate (ADR)**, and **Lead Time Buckets**.
+
+## Key Insights
+- **Revenue & Volume:** **[Total Bookings]** total bookings generated **\$[Realized Revenue]** in realized revenue at an average daily rate of **\$[Average ADR]**.
+- **Cancellations:** Overall cancellation rate is **[Cancellation Rate]%**, with bookings made `90+ days` in advance canceling at the highest rate.
+- **Seasonality:** Bookings and room rates peak in **[Peak Months, e.g., July–August]** and dip during winter.
+
+## Project Files
+- `data/raw/hotel_bookings.csv` — Original dataset
+- `data/processed/hotel_bookings_clean.csv` — Cleaned dataset
+- `dashboards/hotel_bookings_dashboard.pbix` — Interactive Power BI report
+- `reports/figures/dashboard_preview.png` — Dashboard screenshot
